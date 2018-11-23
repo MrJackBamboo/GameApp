@@ -12,17 +12,47 @@
     <canvas id="canvas" width = "798px" height="627px">
     </canvas>
     <div class="sidebar">
-      <div class="turn"></div>
-      <button></button>
-      <div class="cubes"></div>
-      <div class="blockoptions"></div>
+      <div class="sidebarboxes">
+        <div class="divturn">
+          <div id="textturn">Ваш ход!</div>
+          <div id="texthint">Бросьте кубики</div>
+        </div>
+      </div>
+      <div class="sidebarboxes">
+        <div class="scorebox">
+          <div> Счёт в матче </div>
+          <div class="scorenumbers"> 
+            <div class="players"> 
+              <div class="playerscore">
+                0
+              </div> 
+            </div>
+            <div class="players"> 
+              <div class="playerscore"> 
+                0
+              </div>
+            </div>
+           </div> 
+       </div>
+      </div>
+      <div class="sidebarboxes">
+        <div class="buttonbox" id="rolldice" onmousedown="return false" onselectstart="return false">
+          Бросить кубики
+        </div>
+      </div>
+      <div class="sidebarboxes"> 
+        <div class="cubes">
+          <canvas id="showboard" width="368" height="217"></canvas>
+        </div>
+      </div>
+      <div class="sidebarboxes"> 
+        <div class="buttonbox" id="rotateshape" onmousedown="return false" onselectstart="return false">
+          Повернуть фигуру
+        </div>
+      </div>
+      
     </div>
-    <!-- <div id="score">
-        <p class="numbers" id="left"> 0 </p>
-        <p class="numbers score"> : </p>
-        <p class="numbers" id="right"> 0 </p>
-      </div> -->
-    <!-- <div class="DialogWindow"> 
+   <!--  <div class="DialogWindow"> 
       <div id="parent">
         <div class="firstbutton navigate">
             <button id="create"> Создать доску </button>
@@ -32,7 +62,7 @@
         </div>
       </div>
     </div> -->
-   <!--  <script src="/main.js"> </script>
-    --> <script src="/second.js"> </script>
+    <script src="/main.js"> </script>
+    <script src="/second.js"> </script>
   </body>
 </html>

@@ -2,41 +2,62 @@ var arr = new Array(42);
 var stage = new createjs.Stage("canvas");
 var body = document.querySelector('body');
 var canvas = document.querySelector('canvas');
-var diceTrown = true;
-var playerOne = true;
+var sidebar = document.querySelector('.sidebar');
+var canvascubes = document.getElementById('showboard');
+var rolldice = document.getElementById('rolldice');
+var rotateshape = document.getElementById('rotateshape');
+var textturn = document.getElementById('textturn');
+var texthint = document.getElementById('texthint');
+
+var ctx = canvascubes.getContext('2d');
+
+var diceTrown = false;
+var playerOne = false;
+var playerTwo = false;
 var playerOneBlocks = new Array(1);
+var yourturn = true;
 
-let CWidth = 798; //798   | 2.596
-let CHeight = 627; // 627 | 4.18
+let CWidth = 798; 
+let CHeight = 627; 
+var socket = io();
 
-let f = 1;
-let s = 1;
+let f,s;
 
-//creating a notebook sheet
+sidebar.style.width = body.clientWidth - canvas.width - 100 + "px";
+sidebar.style.height = canvas.height - 20 + "px";
+sidebar.style.right = 50 + "px";
 
-	for (var i = 0; i < 42; i++){
-		arr[i] = new Array(33);
-		for (var j = 0; j < 33; j++) {
-		    arr[i][j] = new createjs.Shape();
-			arr[i][j].graphics.beginStroke("#9FD0EB").drawRect(i*19, j*19, 19, 19);
-		    stage.addChild(arr[i][j]);
-		}
-	}
-	line = new createjs.Shape();
-	line.graphics.beginStroke("#EE2A2A").moveTo(0, 28 * 19).lineTo(42 * 19, 28 * 19);
-	stage.addChild(line);
-	stage.update();
-//end//
+//creating a visual cubes
+
+ctx.strokeRect(48,50,114,114);
+ctx.strokeRect(210,50,114,114);
+
+//end
+
+socket.on('showerrore', function(massage){
+	ShowErrore(massage);
+});
+socket.on('deleteerrore', function(){
+	deleteElement(ErroreWindow);
+});
+socket.on('opponentturn', function(turn, hint){
+	textturn.innerHTML = turn;
+	texthint.innerHTML = hint;
+	rolldice.removeEventListener('click', rollDice, false);
+	//rotateshape.removeEventListener('click', rollDice(), false);
+})
+
+
+
 
 //mousemove on canvas
 
 body.addEventListener('mousemove', function(evt){
 	coursorX = evt.pageX;
 	coursorY = evt.pageY;
-	 
+
 	if(diceTrown){
 		if (playerOne){
-			//if (coursorX < CWidth && coursorY < CHeight - (5+s-0.5) * 19){ //значит курсор в поле канваса и не за красной линией
 				if(typeof stalkingBlock == "undefined"){ // обработчик изменения движения квадратов
 					stalkingBlock = new createjs.Shape();
 					instalationBlock = new createjs.Shape();
@@ -60,7 +81,38 @@ body.addEventListener('mousemove', function(evt){
 })
 //end//
 
-//mouseclick
+//click on button rolldice
+rolldice.addEventListener('click', rollDice);
+
+function rollDice(){
+	if(yourturn && !diceTrown){
+		f = Math.round(Math.random() * (6 - 1) + 1);
+		s = Math.round(Math.random() * (6 - 1) + 1);
+		showCubes(48,50, f);
+		showCubes(210,50, s);
+		diceTrown = true;	
+	}
+}
+
+
+rotateshape.addEventListener('click', function(){
+	if(yourturn){
+		stage.removeChild(stalkingBlock);
+		stage.removeChild(instalationBlock);
+		delete stalkingBlock;
+		delete instalationBlock;
+		stalkingBlock = new createjs.Shape();
+		instalationBlock = new createjs.Shape();
+		createRect(s,f, stalkingBlock, "green", 0.75, 1);
+		createRect(s,f, instalationBlock, "green", 1, 0);	
+		[f, s] = [s, f];
+	}
+});
+
+//end
+
+
+//mouseclick on canvas
 canvas.addEventListener("mousedown", function(){
 	if(typeof instalationBlock != "undefined"){
 		playerOneBlocks[playerOneBlocks.length-1] = new createjs.Shape();
@@ -71,6 +123,59 @@ canvas.addEventListener("mousedown", function(){
 		stage.update();	
 	}
 })
+
+
+function showCubes(x,y,n) {
+	ctx.clearRect(x+1, y+1, 112, 112);
+	let array = new Array(3);
+	array[0] = [];
+	array[1] = [];
+	array[2] = [];
+	switch(n){
+		case 1: array[1][1] = 1; break;
+		case 2: array[0][2] = 1; array[2][0] = 1; break;
+		case 3: array[0][2] = 1; array[1][1] = 1; array[2][0] = 1; break;
+		case 4: array[0][0] = 1; array[0][2] = 1; array[2][0] = 1; array[2][2] = 1; break;
+		case 5: array[0][0] = 1; array[0][2] = 1; array[1][1] = 1; array[2][0] = 1; array[2][2] = 1; break;
+		case 6: array[0][0] = 1; array[0][2] = 1; array[1][0] = 1; array[1][2] = 1; array[2][0] = 1; array[2][2] = 1; break;
+	}
+
+	ctx.beginPath();
+	for(let i = 0; i < 3; i++){
+		for(let j = 0; j < 3; j++){
+			if(array[i][j]){
+				ctx.moveTo(x+23+34*j, y+23+34*i);
+				ctx.arc(x+23+34*j, y+23+34*i, 12, 0, Math.PI*2);
+			}
+		}
+	}
+	ctx.fill();
+	ctx.closePath();
+
+	
+}
+
+//end
+
+//creating a notebook sheet
+
+	for (var i = 0; i < 42; i++){
+		arr[i] = new Array(33);
+		for (var j = 0; j < 33; j++) {
+		    arr[i][j] = new createjs.Shape();
+			arr[i][j].graphics.beginStroke("#9FD0EB").drawRect(i*19, j*19, 19, 19);
+		    stage.addChild(arr[i][j]);
+		}
+	}
+	line = new createjs.Shape();
+	line.graphics.beginStroke("#EE2A2A").moveTo(0, 28 * 19).lineTo(42 * 19, 28 * 19);
+	stage.addChild(line);
+	stage.update();
+//end//
+
+
+
+
 
 function createRect(first, second, shape, color, alpha, text, cx, cy){
 	if (cx && cy) {
@@ -141,3 +246,6 @@ function getACenterOfBlock(shape, text, forInstalation, instalated, qwe) {
 
 	stage.update();	
 }
+
+
+//1. написать серверную часть: разграничения по ходам
