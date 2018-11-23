@@ -125,7 +125,9 @@ function ShowErrore(first){
 }
 
 function deleteElement(Element){
-  setTimeout(function(){ document.body.removeChild(Element)},2500);
+  //setTimeout(function(){ 
+    document.body.removeChild(Element)
+    //},2500);
 };
 
 //

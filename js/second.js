@@ -34,6 +34,8 @@ ctx.strokeRect(210,50,114,114);
 
 //end
 
+init();
+
 socket.on('showerrore', function(massage){
 	ShowErrore(massage);
 });
@@ -44,13 +46,19 @@ socket.on('opponentturn', function(turn, hint){
 	textturn.innerHTML = turn;
 	texthint.innerHTML = hint;
 	rolldice.removeEventListener('click', rollDice, false);
-	//rotateshape.removeEventListener('click', rollDice(), false);
+	rotateshape.removeEventListener('click', rotateshape, false);
 })
 
-
+socket.on('clientinfo', function(client){ console.log(client)})
 
 
 //mousemove on canvas
+
+function init(){
+	rolldice.addEventListener('click', rollDice);
+	rotateshape.addEventListener('click', rotateshape);
+}
+
 
 body.addEventListener('mousemove', function(evt){
 	coursorX = evt.pageX;
@@ -82,7 +90,7 @@ body.addEventListener('mousemove', function(evt){
 //end//
 
 //click on button rolldice
-rolldice.addEventListener('click', rollDice);
+
 
 function rollDice(){
 	if(yourturn && !diceTrown){
@@ -94,8 +102,7 @@ function rollDice(){
 	}
 }
 
-
-rotateshape.addEventListener('click', function(){
+function rotateshape(){
 	if(yourturn){
 		stage.removeChild(stalkingBlock);
 		stage.removeChild(instalationBlock);
@@ -107,9 +114,7 @@ rotateshape.addEventListener('click', function(){
 		createRect(s,f, instalationBlock, "green", 1, 0);	
 		[f, s] = [s, f];
 	}
-});
-
-//end
+}
 
 
 //mouseclick on canvas

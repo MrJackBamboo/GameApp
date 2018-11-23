@@ -39,12 +39,16 @@ io.on('connection', function(client) {
     client.emit('showerrore', "Welcome. The game will start after connecting the second user.");
   }
   else if(countKeys(players) == 1){
+
     players[countKeys(players)] = new user(2,client.id);
-    client.broadcast.emit('deleteerrore','');
+    if(typeof players[0] != "undefined"){
+      io.sockets.connected[players[0].textid].emit('deleteerrore','');
+      io.sockets.connected[players[0].textid].emit('opponentturn', "Now your turn", "You need roll the dice");
+      io.sockets.connected[players[0].textid].emit('rolldice', '');
+    }
     client.emit('opponentturn', "Your opponent turn", "Wait until it`s end.");
   }
   else {
-    console.log(players)
     players[countKeys(players)] = new user(3,client.id);
     client.emit('showerrore', "We apologize, but the Board is busy. Wait until one of the players leaves the game.");
   }
@@ -55,7 +59,6 @@ io.on('connection', function(client) {
   });
 
   client.on('disconnect', function () {
-    console.log(players)
     for(userid in players){
       if(players[userid].textid == client.id){
         delete players[userid];
