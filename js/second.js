@@ -22,65 +22,93 @@ let CHeight = 627;
 var socket = io();
 
 let f,s;
+let test = false; 
 
 sidebar.style.width = body.clientWidth - canvas.width - 100 + "px";
 sidebar.style.height = canvas.height - 20 + "px";
 sidebar.style.right = 50 + "px";
 
 //creating a visual cubes
-
-ctx.strokeRect(48,50,114,114);
-ctx.strokeRect(210,50,114,114);
-
+	ctx.strokeRect(48,50,114,114);
+	ctx.strokeRect(210,50,114,114);
 //end
 
-init();
+//creating a notebook sheet\\
+	for (var i = 0; i < 42; i++){
+		arr[i] = new Array(33);
+		for (var j = 0; j < 33; j++) {
+		    arr[i][j] = new createjs.Shape();
+			arr[i][j].graphics.beginStroke("#9FD0EB").drawRect(i*19, j*19, 19, 19);
+		    stage.addChild(arr[i][j]);
+		}
+	}
+	line = new createjs.Shape();
+	line.graphics.beginStroke("#EE2A2A").moveTo(0, 28 * 19).lineTo(42 * 19, 28 * 19);
+	stage.addChild(line);
+	stage.update();
+//end//
+
+socket.on('startofthegame', function(){
+	rolldice.addEventListener('click', rollDice);
+	rotateshape.addEventListener('click', rotateshape);
+});
+
 
 socket.on('showerrore', function(massage){
 	ShowErrore(massage);
 });
+
 socket.on('deleteerrore', function(){
 	deleteElement(ErroreWindow);
 });
+
 socket.on('opponentturn', function(turn, hint){
 	textturn.innerHTML = turn;
 	texthint.innerHTML = hint;
-	rolldice.removeEventListener('click', rollDice, false);
-	rotateshape.removeEventListener('click', rotateshape, false);
+	if(turn[0] === 'Y') {
+		rolldice.removeEventListener('click', rollDice, false);
+		rotateshape.removeEventListener('click', rotateshape, false);
+	}
 })
 
 socket.on('clientinfo', function(client){ console.log(client)})
 
-
-//mousemove on canvas
-
-function init(){
-	rolldice.addEventListener('click', rollDice);
-	rotateshape.addEventListener('click', rotateshape);
-}
-
+socket.on('rolldice', function(f,s){
+	showCubes(48,50, f);
+	showCubes(210,50, s);
+})
 
 body.addEventListener('mousemove', function(evt){
-	coursorX = evt.pageX;
-	coursorY = evt.pageY;
-
+	if(!test){
+		test =  true;
+		setTimeout(function() {
+			test = false;
+			coursorX = evt.pageX;
+			coursorY = evt.pageY;
+		},50);
+	}
+	// coursorX = evt.pageX;
+	// coursorY = evt.pageY;
 	if(diceTrown){
-		if (playerOne){
-				if(typeof stalkingBlock == "undefined"){ // обработчик изменения движения квадратов
+		//if (playerOne){
+				if(typeof stalkingBlock == "undefined"){ // обработчик изменения движения квадратов показывающих куда ставить
 					stalkingBlock = new createjs.Shape();
 					instalationBlock = new createjs.Shape();
 					createRect(f,s, stalkingBlock, "green", 0.75, 1);
-					createRect(f,s, instalationBlock, "green", 1, 0);		
+					createRect(f,s, instalationBlock, "green", 1, 0);	
 				}
 				else {
 					getACenterOfBlock(stalkingBlock, 1, 0, 0, "1");
-					if(typeof instalationBlock != "undefined")
+					if(typeof instalationBlock != "undefined"){
+						console.log('stalkingBlock stalking Oo');
 						getACenterOfBlock(instalationBlock, 0, 1, 0, "2");
+					}
+						
 				}			
-		}
-		else{ // второй игрок
+		//}
+		//else{ // второй игрок
 
-		}
+		//}
 
 	} else{ //нужно попросить бросить кубики
 
@@ -89,6 +117,7 @@ body.addEventListener('mousemove', function(evt){
 })
 //end//
 
+
 //click on button rolldice
 
 
@@ -96,14 +125,17 @@ function rollDice(){
 	if(yourturn && !diceTrown){
 		f = Math.round(Math.random() * (6 - 1) + 1);
 		s = Math.round(Math.random() * (6 - 1) + 1);
-		showCubes(48,50, f);
-		showCubes(210,50, s);
+		socket.emit('rolldice', f,s);
+		// showCubes(48,50, f);
+		// showCubes(210,50, s);
 		diceTrown = true;	
 	}
 }
-
+	
 function rotateshape(){
 	if(yourturn){
+		console.log('my turn yeah')
+		console.log(f,s)
 		stage.removeChild(stalkingBlock);
 		stage.removeChild(instalationBlock);
 		delete stalkingBlock;
@@ -116,7 +148,6 @@ function rotateshape(){
 	}
 }
 
-
 //mouseclick on canvas
 canvas.addEventListener("mousedown", function(){
 	if(typeof instalationBlock != "undefined"){
@@ -128,7 +159,6 @@ canvas.addEventListener("mousedown", function(){
 		stage.update();	
 	}
 })
-
 
 function showCubes(x,y,n) {
 	ctx.clearRect(x+1, y+1, 112, 112);
@@ -156,31 +186,7 @@ function showCubes(x,y,n) {
 	}
 	ctx.fill();
 	ctx.closePath();
-
-	
-}
-
-//end
-
-//creating a notebook sheet
-
-	for (var i = 0; i < 42; i++){
-		arr[i] = new Array(33);
-		for (var j = 0; j < 33; j++) {
-		    arr[i][j] = new createjs.Shape();
-			arr[i][j].graphics.beginStroke("#9FD0EB").drawRect(i*19, j*19, 19, 19);
-		    stage.addChild(arr[i][j]);
-		}
-	}
-	line = new createjs.Shape();
-	line.graphics.beginStroke("#EE2A2A").moveTo(0, 28 * 19).lineTo(42 * 19, 28 * 19);
-	stage.addChild(line);
-	stage.update();
-//end//
-
-
-
-
+}// отрисовка игральных костей
 
 function createRect(first, second, shape, color, alpha, text, cx, cy){
 	if (cx && cy) {
@@ -199,7 +205,7 @@ function createRect(first, second, shape, color, alpha, text, cx, cy){
 	}
 	stage.addChild(shape);
 	stage.update();		
-}
+}//создание прямоугольников
 
 function getACenterOfBlock(shape, text, forInstalation, instalated, qwe) {
 	if (!forInstalation && !instalated){ //блок преследователь
